@@ -18,6 +18,10 @@ type Update = {
   [k: string]: any;
 };
 
+/*
+ * Build an update expression along with the expression attribute values for the associated
+ * placeholders.
+ */
 export function buildUpdateExpression(input: Update) {
   const fields = Object.entries(input).reduce<{ [k: string]: any }>(
     (pairs, [key, value]) => (value !== undefined ? { [`:${key}`]: value, ...pairs } : pairs),

@@ -11,27 +11,29 @@ import { jsonResponse } from "../util";
 
 const client = new DynamoDB({ region: "us-east-1" });
 
-const schema = yup.object({
-  title: yup.string().required(),
-  body: yup.string().optional(),
-  done: yup
-    .boolean()
-    .optional()
-    .default(() => false),
-});
+const schema = yup
+  .object({
+    title: yup.string().required(),
+    body: yup.string().optional(),
+    done: yup
+      .boolean()
+      .optional()
+      .default(() => false),
+  })
+  .noUnknown(true);
 
 type CreateTodoInput = Asserts<typeof schema>;
 
-type SignedUrlResponse = APIGatewayProxyResultV2<{ error: string } | Todo>;
+type Response = APIGatewayProxyResultV2<{ error: string } | Todo>;
 
-export const handler: APIGatewayProxyHandlerV2<SignedUrlResponse> = async (event): Promise<SignedUrlResponse> => {
+export const handler: APIGatewayProxyHandlerV2<Response> = async (event): Promise<Response> => {
   if (!event.headers["content-type"]?.match(/^application\/json/) || !event.body) {
     return jsonResponse({ error: "Not JSON" }, 400);
   }
 
   let CreateTodoInput: CreateTodoInput;
   try {
-    CreateTodoInput = schema.validateSync(JSON.parse(event.body));
+    CreateTodoInput = schema.validateSync(JSON.parse(event.body), { strict: true });
   } catch (err) {
     if (err instanceof yup.ValidationError) {
       return jsonResponse({ error: err.errors.join("; ") });

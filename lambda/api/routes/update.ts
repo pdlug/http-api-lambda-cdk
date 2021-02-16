@@ -1,6 +1,5 @@
 import { APIGatewayProxyHandlerV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
-import { v4 as uuid } from "uuid";
 import * as yup from "yup";
 import type { Asserts } from "yup";
 
@@ -17,13 +16,14 @@ const schema = yup
     body: yup.string().optional(),
     done: yup.boolean().optional(),
   })
-  .noUnknown(true);
+  .noUnknown(true)
+  .required();
 
 type UpdateTodoInput = Asserts<typeof schema>;
 
-type SignedUrlResponse = APIGatewayProxyResultV2<{ error: string } | Todo>;
+type Response = APIGatewayProxyResultV2<{ error: string } | Todo>;
 
-export const handler: APIGatewayProxyHandlerV2<SignedUrlResponse> = async (event): Promise<SignedUrlResponse> => {
+export const handler: APIGatewayProxyHandlerV2<Response> = async (event): Promise<Response> => {
   if (!event.headers["content-type"]?.match(/^application\/json/) || !event.body) {
     return jsonResponse({ error: "Not JSON" }, 400);
   }
@@ -36,7 +36,7 @@ export const handler: APIGatewayProxyHandlerV2<SignedUrlResponse> = async (event
 
   let todoInput: UpdateTodoInput;
   try {
-    todoInput = schema.validateSync(JSON.parse(event.body));
+    todoInput = schema.validateSync(JSON.parse(event.body), { strict: true });
   } catch (err) {
     if (err instanceof yup.ValidationError) {
       return jsonResponse({ error: err.errors.join("; ") });

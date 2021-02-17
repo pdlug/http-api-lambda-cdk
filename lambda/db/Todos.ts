@@ -14,7 +14,7 @@ import { prefixKey, unprefixKey, buildUpdateExpression } from "./util";
 
 export type TodoItem = BaseItem & {
   title: string;
-  body: string;
+  body?: string;
   done: boolean;
 };
 
@@ -37,15 +37,17 @@ export async function create(client: DynamoDB, todo: Todo): Promise<string> {
   const { id, ...rest } = todo;
   const key = prefixKey("TODO", id);
 
+  const todoItem: TodoItem = {
+    pk: key,
+    sk: key,
+    gs1pk: "type",
+    gs1sk: key,
+    ...rest,
+  };
+
   const todoParams: PutItemInput = {
     TableName: process.env.TABLE_NAME,
-    Item: marshall({
-      pk: key,
-      sk: key,
-      gs1pk: "type",
-      gs1sk: key,
-      ...rest,
-    }),
+    Item: marshall(todoItem),
   };
 
   await client.putItem(todoParams);

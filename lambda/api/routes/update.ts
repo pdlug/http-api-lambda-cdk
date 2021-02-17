@@ -29,6 +29,7 @@ export const handler: APIGatewayProxyHandlerV2<Response> = async (event): Promis
   }
 
   const id = event.pathParameters?.id;
+  const payload = JSON.parse(event.body);
 
   if (!id) {
     return jsonResponse({ message: "Not Found" }, 404);
@@ -36,7 +37,8 @@ export const handler: APIGatewayProxyHandlerV2<Response> = async (event): Promis
 
   let todoInput: UpdateTodoInput;
   try {
-    todoInput = schema.validateSync(JSON.parse(event.body), { strict: true });
+    schema.validateSync(payload, { strict: true });
+    todoInput = schema.validateSync(payload);
   } catch (err) {
     if (err instanceof yup.ValidationError) {
       return jsonResponse({ error: err.errors.join("; ") });

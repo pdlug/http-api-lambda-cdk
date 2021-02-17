@@ -30,10 +30,12 @@ export const handler: APIGatewayProxyHandlerV2<Response> = async (event): Promis
   if (!event.headers["content-type"]?.match(/^application\/json/) || !event.body) {
     return jsonResponse({ error: "Not JSON" }, 400);
   }
+  const payload = JSON.parse(event.body);
 
-  let CreateTodoInput: CreateTodoInput;
+  let createTodoInput: CreateTodoInput;
   try {
-    CreateTodoInput = schema.validateSync(JSON.parse(event.body), { strict: true });
+    schema.validateSync(payload, { strict: true });
+    createTodoInput = schema.validateSync(payload);
   } catch (err) {
     if (err instanceof yup.ValidationError) {
       return jsonResponse({ error: err.errors.join("; ") });
@@ -44,7 +46,7 @@ export const handler: APIGatewayProxyHandlerV2<Response> = async (event): Promis
 
   const newTodo: Todo = {
     id: uuid(),
-    ...CreateTodoInput,
+    ...createTodoInput,
   };
 
   try {

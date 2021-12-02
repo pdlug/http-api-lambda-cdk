@@ -1,10 +1,11 @@
-import * as cdk from "@aws-cdk/core";
+import { Construct } from "constructs";
+import * as cdk from "aws-cdk-lib";
 
 import { Api } from "./api";
 import { Database } from "./database";
 
 export class HttpApiLambdaCdkStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const database = new Database(this, "DB");

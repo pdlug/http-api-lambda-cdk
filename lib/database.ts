@@ -1,13 +1,14 @@
-import * as cdk from "@aws-cdk/core";
-import * as ddb from "@aws-cdk/aws-dynamodb";
+import { Construct } from "constructs";
+import * as cdk from "aws-cdk-lib";
+import { aws_dynamodb as ddb } from "aws-cdk-lib";
 
-export class Database extends cdk.Construct {
+export class Database extends Construct {
   public readonly table: ddb.Table;
 
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id);
 
-    const table = new ddb.Table(this, "FilesTable", {
+    const table = new ddb.Table(this, "TodosTable", {
       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
       partitionKey: {
         name: "pk",

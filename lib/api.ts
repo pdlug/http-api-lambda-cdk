@@ -1,9 +1,10 @@
-import * as cdk from "@aws-cdk/core";
-import * as apigw2 from "@aws-cdk/aws-apigatewayv2";
-import * as apigwIntegrations from "@aws-cdk/aws-apigatewayv2-integrations";
-import * as ddb from "@aws-cdk/aws-dynamodb";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodeJS from "@aws-cdk/aws-lambda-nodejs";
+import { Construct } from "constructs";
+import * as cdk from "aws-cdk-lib";
+import * as apigw2 from "@aws-cdk/aws-apigatewayv2-alpha";
+import * as apigwIntegrations from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
+import { aws_dynamodb as ddb } from "aws-cdk-lib";
+import { aws_lambda as lambda } from "aws-cdk-lib";
+import { aws_lambda_nodejs as lambdaNodeJS } from "aws-cdk-lib";
 
 import { routes } from "../lambda/api/routes";
 
@@ -12,10 +13,10 @@ export type ApiProps = {
   table: ddb.Table;
 };
 
-export class Api extends cdk.Construct {
+export class Api extends Construct {
   public readonly api: apigw2.HttpApi;
 
-  constructor(scope: cdk.Construct, id: string, { apiName, table }: ApiProps) {
+  constructor(scope: Construct, id: string, { apiName, table }: ApiProps) {
     super(scope, id);
 
     const httpApi = new apigw2.HttpApi(this, "API", {
@@ -34,9 +35,10 @@ export class Api extends cdk.Construct {
       });
       table.grantFullAccess(apiLambda);
 
-      const routeIntegration = new apigwIntegrations.LambdaProxyIntegration({
-        handler: apiLambda,
-      });
+      const routeIntegration = new apigwIntegrations.HttpLambdaIntegration(
+        `api-route-${handler}-integration`,
+        apiLambda,
+      );
 
       httpApi.addRoutes({
         path,
